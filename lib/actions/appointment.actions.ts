@@ -1,3 +1,5 @@
+"use server";
+
 import {
   APPOINTMENT_COLLECTION_ID,
   DATABASE_ID,
