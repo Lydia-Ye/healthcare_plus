@@ -14,6 +14,7 @@ import { ID, Query } from "node-appwrite";
 import { parseStringify } from "@/lib/utils";
 import { InputFile } from "node-appwrite/file";
 
+// CREATE APPWRITE USER
 export const createUser = async (user: CreateUserParams) => {
   try {
     const newUser = await users.create(
@@ -27,13 +28,16 @@ export const createUser = async (user: CreateUserParams) => {
 
     return parseStringify(newUser);
   } catch (error: any) {
+    // Check existing user
     if (error && error?.code === 409) {
       const documents = await users.list([Query.equal("email", [user.email])]);
       return documents.users[0];
     }
+    console.error("An error occurred while creating a new user:", error);
   }
 };
 
+// GET USER
 export const getUser = async (userId: string) => {
   try {
     const user = await users.get(userId);
@@ -46,12 +50,13 @@ export const getUser = async (userId: string) => {
   }
 };
 
+// GET PATIENT
 export const getPatient = async (userId: string) => {
   try {
     const patients = await databases.listDocuments(
       DATABASE_ID!,
       PATIENT_COLLECTION_ID!,
-      [Query.equal("$userId", userId)],
+      [Query.equal("userId", [userId])],
     );
     return parseStringify(patients.documents[0]);
   } catch (error) {
