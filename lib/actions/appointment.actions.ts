@@ -8,6 +8,7 @@ import {
 import { ID, Query } from "node-appwrite";
 import { parseStringify } from "@/lib/utils";
 import { Appointment } from "@/types/appwrite.types";
+import { revalidatePath } from "next/cache";
 
 export const createAppointment = async (
   appointment: CreateAppointmentParams,
@@ -82,5 +83,30 @@ export const getRecentAppointmentList = async () => {
       "An error occurred while getting recent appointments:",
       error,
     );
+  }
+};
+
+export const updateAppointment = async ({
+  appointmentId,
+  userId,
+  appointment,
+  type,
+}: UpdateAppointmentParams) => {
+  try {
+    const updatedAppointment = await databases.updateDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      appointmentId,
+      appointment,
+    );
+    if (!updatedAppointment) {
+      throw new Error("Appointment not found");
+    }
+
+    // TODO: SMS notification
+    revalidatePath("/admin");
+    return parseStringify(updatedAppointment);
+  } catch (error) {
+    console.error("An error occurred while updating an appointment:", error);
   }
 };
